@@ -63,7 +63,6 @@ class Model(tf.Module):
     if fixed_arc is None:
       images, labels = read_data(data_path)
     else:
-      # 固定架构
       images, labels = read_data(data_path, num_valids=0)
 
     self.num_train_examples = np.shape(images["train"])[0]
@@ -71,8 +70,6 @@ class Model(tf.Module):
     self.lr_dec_every = lr_dec_every * self.num_train_batches
     self.train_dataloader = self.create_loader((images['train'], labels['train']),
                                                self.num_train_examples, self.train_batch_size)
-    # plt.imshow(images['train'][2])
-    # plt.show()
 
     if images["valid"] is not None:
       self.num_valid_examples = np.shape(images["valid"])[0]
@@ -83,7 +80,6 @@ class Model(tf.Module):
       #                                       self.num_valid_examples, 2500, shuffle=False)
       # self.num_valid_batches = ((self.num_valid_examples + 2500 - 1) // 2500)
 
-      ## 显存不足
       self.valid_dataloader = self.create_loader((images['valid'], labels['valid']),
                                             self.num_valid_examples, self.eval_batch_size, shuffle=False)
       self.num_valid_batches = ((self.num_valid_examples + self.eval_batch_size - 1) // self.eval_batch_size)

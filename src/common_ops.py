@@ -5,12 +5,12 @@ import tensorflow as tf
 def lstm(x, prev_c, prev_h, w):
   ifog = tf.matmul(tf.concat([x, prev_h], axis=1), w)
   i, f, o, g = tf.split(ifog, 4, axis=1)
-  i = tf.sigmoid(i)  # 输入门
-  f = tf.sigmoid(f)  # 遗忘门
-  o = tf.sigmoid(o)  # 输出门
-  g = tf.tanh(g)     # 标准RNN
-  next_c = i * g + f * prev_c   # C为细胞状态
-  next_h = o * tf.tanh(next_c)  # h为之前的输出
+  i = tf.sigmoid(i) 
+  f = tf.sigmoid(f) 
+  o = tf.sigmoid(o) 
+  g = tf.tanh(g)  
+  next_c = i * g + f * prev_c  
+  next_h = o * tf.tanh(next_c)
   return next_c, next_h
 
 

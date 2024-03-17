@@ -39,8 +39,6 @@ parser.add_argument('--eval_batch_size', type=int, default=256, metavar='batch_s
 parser.add_argument('--num_epochs', type=int, default=300, metavar='num_epochs', help='')
 parser.add_argument('--eval_every_epochs', type=int, default=1, help='How many epochs to eval')  # TODO
 parser.add_argument('--controller_training', default=True, help=" 'ce' or 'focal'")
-
-# ==================== child =========================
 parser.add_argument('--child_fixed_arc', type=str, default=None, help="")
 parser.add_argument('--child_num_layers', type=int, default=12, help='')
 parser.add_argument('--child_filter_size', type=int, default=5, help='')
@@ -53,20 +51,16 @@ parser.add_argument('--child_cutout_size', type=int, default=None, help='CutOut 
 parser.add_argument('--child_keep_prob', type=float, default=0.90, help='')
 parser.add_argument('--child_optim', default="adam", help='momentum/sgd/adam')
 parser.add_argument('--child_train_log_every', type=int, default=100, help='How many steps to log')
-# ---------- decay lr -----------
 parser.add_argument('--child_lr_dec_every', type=int, default=100, help='')
 parser.add_argument('--child_lr_dec_rate', type=float, default=0.25, help='')
 parser.add_argument('--child_lr', type=float, default=0.002, help='')  # TODO
-# ---------- cosine lr ----------
 parser.add_argument('--child_lr_cosine', default=False, help='Use cosine lr schedule')
 parser.add_argument('--child_lr_T_0', type=int, default=10, help='for lr schedule')
 parser.add_argument('--child_lr_T_mul', type=int, default=2, help='for lr schedule')
 parser.add_argument('--child_lr_max', type=float, default=None, help='for lr schedule')
 parser.add_argument('--child_lr_min', type=float, default=1e-4, help='for lr schedule')
-# ------------ clip --------------
 parser.add_argument('--child_clip_mode', default="global", help='global, norm, or None')
 parser.add_argument('--child_grad_bound', type=float, default=5.0, help='Gradient clipping')
-# --------- wait for test ---------  # TODO
 parser.add_argument('--child_skip_pattern', type=str, default=None, help='Must be [dense, None]')
 parser.add_argument('--child_sync_replicas', default=False, help='To sync or not to sync')
 parser.add_argument('--child_use_aux_heads', default=True, help='To sync or not to sync')
@@ -76,7 +70,6 @@ parser.add_argument('--child_drop_path_keep_prob', type=float, default=0.6,
                     help='minimum drop_path_keep_prob, only used in fix_layer')
 parser.add_argument('--child_l2_reg', type=float, default=0.00025,
                     help='default:1e-4; apply for loss. l1-lasso, l2-ridge')
-# ==================== controller ======================
 parser.add_argument('--controller_train_steps', type=int, default=50, help='multi device')
 parser.add_argument('--controller_log_every', type=int, default=10, help='How many steps to log')
 parser.add_argument('--controller_forwards_limit', type=int, default=2, help='multi device')
@@ -84,24 +77,19 @@ parser.add_argument('--controller_train_every', type=int, default=1,  # TODO ena
                     help='train the controller after this number of epochs')
 parser.add_argument('--controller_search_whole_channels', default=True, help='')
 parser.add_argument('--controller_use_critic', default=False, help='')
-# ------------- lr ---------------
 parser.add_argument('--controller_lr', type=float, default=1e-3, help='')
 parser.add_argument('--controller_lr_dec_rate', type=float, default=1.0, help='no use')
-# ----------- get loss ------------------
 parser.add_argument('--controller_entropy_weight', type=float, default=0.0001, help='loss += weight * entropy')
 parser.add_argument('--controller_skip_target', type=float, default=0.4, help='for skip_penaltys')
 parser.add_argument('--controller_skip_weight', type=float, default=0.8,
                     help='loss += skip_weight * skip_penaltys')
-# -------- wait for test ----------   # TODO
 parser.add_argument('--controller_l2_reg', type=float, default=0.0, help='')
 parser.add_argument('--controller_bl_dec', type=float, default=0.99,
                     help='related to controller loss， wait to define')
-# is attention?
 parser.add_argument('--controller_tanh_constant', type=float, default=1.10,
                     help='tanh_constant * tf.tanh(logits)')
 parser.add_argument('--controller_op_tanh_reduce', type=float, default=2.5, help='reduce tanh_constant')
 parser.add_argument('--controller_temperature', type=float, default=None, help='logits /= temperature')
-# ------------- multi device -----------------
 parser.add_argument('--controller_num_aggregate', type=int, default=1, help='multi device')
 parser.add_argument('--controller_num_replicas', type=int, default=1, help='multi device')
 parser.add_argument('--controller_sync_replicas', default=False, help='To sync or not to sync')
@@ -252,7 +240,7 @@ def train():
                 float(curr_time - start_time) / 60)
             print(log_string)
 
-        # 验证acc
+        # acc
         print("Here are 10 architectures")
         controller_eval_acc = []
         for _ in range(10):
