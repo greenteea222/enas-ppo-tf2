@@ -167,7 +167,7 @@ class GeneralController(tf.Module):
         next_c, next_h = stack_lstm(inputs, prev_c, prev_h, self.w_lstm)
         ddd = time.time() - timetmp0
         prev_c, prev_h = next_c, next_h
-        logit = tf.matmul(next_h[-1], self.w_soft)  # w_soft决定输出5个
+        logit = tf.matmul(next_h[-1], self.w_soft)
         if self.temperature is not None:
           logit /= self.temperature
         if self.tanh_constant is not None:
@@ -182,11 +182,11 @@ class GeneralController(tf.Module):
         arc_seq.append(branch_id)
         if training:
           log_prob = tf.nn.sparse_softmax_cross_entropy_with_logits(
-            logits=logit, labels=branch_id)  # 计算选中branch_id的概率
+            logits=logit, labels=branch_id) 
           log_probs.append(log_prob)
           entropy = tf.stop_gradient(log_prob * tf.exp(-log_prob))
-          entropys.append(entropy)   # 可作为reward的一部分
-        inputs = tf.nn.embedding_lookup(self.w_emb, branch_id)  # embedding
+          entropys.append(entropy)  
+        inputs = tf.nn.embedding_lookup(self.w_emb, branch_id) 
       else:
         for branch_id in range(0, self.num_branches):
           next_c, next_h = stack_lstm(inputs, prev_c, prev_h, self.w_lstm)
@@ -229,11 +229,10 @@ class GeneralController(tf.Module):
           entropys.append(entropy)
           inputs = tf.nn.embedding_lookup(self.w_emb["count"][branch_id], count)
 
-      next_c, next_h = stack_lstm(inputs, prev_c, prev_h, self.w_lstm)  # TODO w_lstm没有更新
+      next_c, next_h = stack_lstm(inputs, prev_c, prev_h, self.w_lstm) 
       prev_c, prev_h = next_c, next_h
 
       if layer_id > 0:
-        # anchors，w_attn_2，v_attn只有在这里用   # anchors包含了所有输出
         query = tf.concat(anchors_w_1, axis=0)
         query = tf.tanh(query + tf.matmul(next_h[-1], self.w_attn_2))
         query = tf.matmul(query, self.v_attn)
@@ -244,7 +243,7 @@ class GeneralController(tf.Module):
           logit = self.tanh_constant * tf.tanh(logit)
 
         skip = tf.random.categorical(logit, 1, dtype=tf.int32)
-        skip = tf.reshape(skip, [layer_id])  # TODO 直接展成layer_id个0/1？
+        skip = tf.reshape(skip, [layer_id]) 
         arc_seq.append(skip)
 
         if training:
@@ -262,7 +261,7 @@ class GeneralController(tf.Module):
           entropys.append(entropy)
 
         skip = tf.cast(skip, dtype=tf.float32)
-        skip = tf.reshape(skip, [1, layer_id])   # 前几个是否skip
+        skip = tf.reshape(skip, [1, layer_id]) 
         if training:
           skip_count.append(tf.reduce_sum(skip))
         inputs = tf.matmul(skip, tf.concat(anchors, axis=0))
@@ -270,7 +269,7 @@ class GeneralController(tf.Module):
       else:
         inputs = self.g_emb    # TODO layer_id=1
 
-      anchors.append(next_h[-1])   # anchors包含了所有输出
+      anchors.append(next_h[-1]) 
       anchors_w_1.append(tf.matmul(next_h[-1], self.w_attn_1))
 
     arc_seq = tf.concat(arc_seq, axis=0)
@@ -294,7 +293,7 @@ class GeneralController(tf.Module):
     with tf.GradientTape(watch_accessed_variables=False) as tape:
       tape.watch(self.trainable_variables)
       self._build_sampler()
-      child_model.build_valid_rl(self.sample_arc)   # 还是普通的valid只不过shuffle了数据，得到valid_shuffle_acc
+      child_model.build_valid_rl(self.sample_arc) 
       self.valid_acc = (tf.cast(child_model.valid_shuffle_acc,dtype=tf.float32 ) /
                         tf.cast(child_model.eval_batch_size, dtype=tf.float32))
       self.reward = self.valid_acc
@@ -330,6 +329,6 @@ class GeneralController(tf.Module):
     self.opt.apply_gradients(zip(gradients, self.trainable_variables))
 
   def eval_controller(self, child_model):
-    self._build_sampler(training=False)  # 更新下sample_arc
+    self._build_sampler(training=False) 
     self.eval_acc = child_model._build_valid(self.sample_arc)
     return self.sample_arc
